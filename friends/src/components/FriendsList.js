@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
+import FriendForm from "./FriendForm";
 
 export default class FriendList extends Component {
   constructor(props) {
@@ -8,6 +9,7 @@ export default class FriendList extends Component {
       friends: []
     };
   }
+
   componentDidMount() {
     axios
       .get("http://localhost:5000/friends")
@@ -18,29 +20,40 @@ export default class FriendList extends Component {
         console.error("Server Error", error);
       });
   }
+
+  handleDelete = e => {
+    axios
+      .delete("http://localhost:5000/friends:id", {
+        id: Number(this.state.id),
+        name: this.state.name,
+        age: Number(this.state.age),
+        email: this.state.email
+      })
+      .then(response => {
+        console.log(response);
+      })
+      .catch(err => {
+        console.log(err.response);
+      });
+  };
+
+  createFriend = data => {
+    this.setState({ friends: data });
+  };
+
   render() {
     return (
       <div className="friends-list">
         {this.state.friends.map(friend => (
-          <FriendDetails key={friend.id} friend={friend} />
+          <div className="friend-card">
+            <h2>{friend.name}</h2>
+            <p>{friend.age}</p>
+            <p>{friend.email}</p>
+            <button onClick={this.handleDelete}>Delete</button>
+          </div>
         ))}
+        <FriendForm createFriend={this.createFriend} />
       </div>
     );
   }
-}
-function FriendDetails({ friend }) {
-  const { name, age, email } = friend;
-  return (
-    <div className="friend-card">
-      <div className="friend-name">
-        Name: <em>{name}</em>
-      </div>
-      <div className="friend-age">
-        Age: <em>{age}</em>
-      </div>
-      <div className="friend-email">
-        Email: <em>{email}</em>
-      </div>
-    </div>
-  );
 }
